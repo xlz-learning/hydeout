@@ -4,7 +4,7 @@ highlighter:      rouge
 
 # Setup
 title:            Xiaolong's Journey
-tagline:          'A Jekyll theme'
+tagline:          'Commited to lifelong learning'
 description:      Weekly update of what I am working on and what I am reading
 url:              https://github.com/xlz-learning/xlz-learning.github.io
 baseurl:          ''
