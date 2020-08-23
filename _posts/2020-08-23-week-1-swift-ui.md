@@ -1,6 +1,8 @@
 ---
 layout: post
-title: Aug 17 - 23
+title: 100 Days Of SwiftUI - Aug 17 - 23
+categories:
+    - project
 excerpt_separator:  <!--more-->
 ---
 
