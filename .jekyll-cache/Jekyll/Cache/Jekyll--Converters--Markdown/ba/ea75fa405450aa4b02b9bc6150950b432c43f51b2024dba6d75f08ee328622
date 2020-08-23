@@ -1,0 +1,237 @@
+I"�<h2 id="day-59---project-12-part-3"><a href="https://www.hackingwithswift.com/100/swiftui/59">Day 59 - Project 12, part 3</a></h2>
+
+<p>One of the best ways to learn is to write your own code as often as possible, so here are three ways you should try extending this app to make sure you fully understand what’s going on.</p>
+
+<p>All three of these tasks require you to modify the <strong><code class="language-plaintext highlighter-rouge">FilteredList</code></strong> view we made:</p>
+
+<ul>
+  <li>
+    <p>Make it accept an array of <strong><code class="language-plaintext highlighter-rouge">NSSortDescriptor</code></strong> objects to get used in its fetch request.</p>
+
+    <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// In FilteredList initializer, add another argument to accept a list of NSSortDescriptor</span>
+  <span class="nf">init</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSSortDescriptor</span><span class="p">],</span> <span class="kd">@ViewBuilder</span> <span class="nv">content</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Content</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">fetchRequest</span> <span class="o">=</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">entity</span><span class="p">:</span> <span class="kt">T</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">,</span> <span class="nv">predicate</span><span class="p">:</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%K BEGINSWITH %@"</span><span class="p">,</span> <span class="n">filterKey</span><span class="p">,</span> <span class="n">filterValue</span><span class="p">))</span>
+      <span class="k">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Create sortDescriptors constant and use it inside the FilteredList creation</span>
+  <span class="k">let</span> <span class="nv">sortDescriptors</span> <span class="o">=</span> <span class="p">[</span><span class="kt">NSSortDescriptor</span><span class="p">(</span><span class="nv">keyPath</span><span class="p">:</span> <span class="p">\</span><span class="kt">Singer</span><span class="o">.</span><span class="n">firstName</span><span class="p">,</span> <span class="nv">ascending</span><span class="p">:</span> <span class="kc">true</span><span class="p">)]</span>
+  <span class="kt">FilteredList</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="s">"lastName"</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="n">lastNameFilter</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="nv">singer</span><span class="p">:</span> <span class="kt">Singer</span><span class="p">)</span> <span class="k">in</span>
+      <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedFirstName</span><span class="se">)</span><span class="s"> </span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedLastName</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Make it accept a string parameter that controls which predicate is applied. You can use Swift’s string interpolation to place this in the predicate.</p>
+
+    <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// In FilteredList initializer, add another argumetn to accept predicate keyword</span>
+  <span class="nf">init</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSSortDescriptor</span><span class="p">],</span> <span class="nv">predicateKeyWord</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kd">@ViewBuilder</span> <span class="nv">content</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Content</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">fetchRequest</span> <span class="o">=</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">entity</span><span class="p">:</span> <span class="kt">T</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">,</span> <span class="nv">predicate</span><span class="p">:</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%K </span><span class="se">\(</span><span class="n">predicateKeyWord</span><span class="se">)</span><span class="s"> %@"</span><span class="p">,</span> <span class="n">filterKey</span><span class="p">,</span> <span class="n">filterValue</span><span class="p">))</span>
+      <span class="k">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+  <span class="p">}</span>
+
+  <span class="c1">// In ContentView, create a new constant</span>
+  <span class="k">let</span> <span class="nv">predicateKeyWord</span> <span class="o">=</span> <span class="s">"BEGINSWITH"</span>
+  <span class="c1">// Pass the predicateKeyWord to FilteredList</span>
+  <span class="kt">FilteredList</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="s">"lastName"</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="n">lastNameFilter</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">,</span> <span class="nv">predicateKeyWord</span><span class="p">:</span> <span class="n">predicateKeyWord</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="nv">singer</span><span class="p">:</span> <span class="kt">Singer</span><span class="p">)</span> <span class="k">in</span>
+      <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedFirstName</span><span class="se">)</span><span class="s"> </span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedLastName</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Modify the predicate string parameter to be an enum such as <strong><code class="language-plaintext highlighter-rouge">.beginsWith</code></strong>, then make that enum get resolved to a string inside the initializer.</p>
+
+    <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Add PredicateKeyword</span>
+  <span class="kd">enum</span> <span class="kt">PredicateKeyword</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CustomStringConvertible</span> <span class="p">{</span>
+      <span class="c1">// Just some example of possible keywords</span>
+      <span class="c1">// Find the whole list in https://nshipster.com/nspredicate/</span>
+      <span class="k">case</span> <span class="n">beginsWith</span>
+      <span class="k">case</span> <span class="n">contains</span>
+      <span class="k">case</span> <span class="n">endsWith</span>
+      <span class="k">case</span> <span class="n">like</span>
+      <span class="k">case</span> <span class="n">matches</span>
+        
+      <span class="k">var</span> <span class="nv">description</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="n">rawValue</span><span class="o">.</span><span class="nf">uppercased</span><span class="p">()</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Modify FilteredList to accept PredicateKeyword enum</span>
+  <span class="nf">init</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSSortDescriptor</span><span class="p">],</span> <span class="nv">predicateKeyWord</span><span class="p">:</span> <span class="kt">PredicateKeyword</span><span class="p">,</span> <span class="kd">@ViewBuilder</span> <span class="nv">content</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Content</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">fetchRequest</span> <span class="o">=</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">entity</span><span class="p">:</span> <span class="kt">T</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">,</span> <span class="nv">predicate</span><span class="p">:</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%K </span><span class="se">\(</span><span class="n">predicateKeyWord</span><span class="o">.</span><span class="n">description</span><span class="se">)</span><span class="s"> %@"</span><span class="p">,</span> <span class="n">filterKey</span><span class="p">,</span> <span class="n">filterValue</span><span class="p">))</span>
+      <span class="k">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Pass predicateKeyWord enum value to the constructor inside ContentView</span>
+  <span class="kt">FilteredList</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="s">"lastName"</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="n">lastNameFilter</span><span class="p">,</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="n">sortDescriptors</span><span class="p">,</span> <span class="nv">predicateKeyWord</span><span class="p">:</span> <span class="n">predicateKeyWord</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="nv">singer</span><span class="p">:</span> <span class="kt">Singer</span><span class="p">)</span> <span class="k">in</span>
+      <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedFirstName</span><span class="se">)</span><span class="s"> </span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedLastName</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="day-58---project-12-part-2"><a href="https://www.hackingwithswift.com/100/swiftui/58">Day 58 - Project 12, part 2</a></h2>
+
+<p>Using <code class="language-plaintext highlighter-rouge">NSPredicate</code> to filter data stored in <code class="language-plaintext highlighter-rouge">Core Data</code></p>
+
+<p>In order to filter <code class="language-plaintext highlighter-rouge">Core Data</code> result. Inside a SwiftUI view, we can create a <code class="language-plaintext highlighter-rouge">FetchRequest</code> type, something like the following</p>
+
+<p><code class="language-plaintext highlighter-rouge">var fetchRequest = FetchRequest&lt;Singer&gt;</code></p>
+
+<p>Set the value to the property like `</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fetchRequest</span> <span class="o">=</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">Singer</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">entity</span><span class="p">:</span> <span class="kt">Singer</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[],</span> <span class="nv">predicate</span><span class="p">:</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"lastName BEGINSWITH %@"</span><span class="p">,</span> <span class="s">"some string"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Then we can simply fetch the value like <code class="language-plaintext highlighter-rouge">fetchRequest.lastName</code></p>
+
+<p>Also we can utilize generics to create SwiftUI views using the following code</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">FilteredList</span><span class="o">&lt;</span><span class="kt">T</span><span class="p">:</span> <span class="kt">NSManagedObject</span><span class="p">,</span> <span class="kt">Content</span><span class="p">:</span> <span class="kt">View</span><span class="o">&gt;</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">fetchRequest</span><span class="p">:</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span>
+    <span class="k">var</span> <span class="nv">singers</span><span class="p">:</span> <span class="kt">FetchedResults</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span> <span class="p">{</span> <span class="n">fetchRequest</span><span class="o">.</span><span class="n">wrappedValue</span> <span class="p">}</span>
+
+    <span class="c1">// this is our content closure; we'll call this once for each item in the list</span>
+    <span class="k">let</span> <span class="nv">content</span><span class="p">:</span> <span class="p">(</span><span class="kt">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Content</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">List</span><span class="p">(</span><span class="n">fetchRequest</span><span class="o">.</span><span class="n">wrappedValue</span><span class="p">,</span> <span class="nv">id</span><span class="p">:</span> <span class="p">\</span><span class="o">.</span><span class="k">self</span><span class="p">)</span> <span class="p">{</span> <span class="n">singer</span> <span class="k">in</span>
+            <span class="k">self</span><span class="o">.</span><span class="nf">content</span><span class="p">(</span><span class="n">singer</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nf">init</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kd">@ViewBuilder</span> <span class="nv">content</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Content</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">fetchRequest</span> <span class="o">=</span> <span class="kt">FetchRequest</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nv">entity</span><span class="p">:</span> <span class="kt">T</span><span class="o">.</span><span class="nf">entity</span><span class="p">(),</span> <span class="nv">sortDescriptors</span><span class="p">:</span> <span class="p">[],</span> <span class="nv">predicate</span><span class="p">:</span> <span class="kt">NSPredicate</span><span class="p">(</span><span class="nv">format</span><span class="p">:</span> <span class="s">"%K BEGINSWITH %@"</span><span class="p">,</span> <span class="n">filterKey</span><span class="p">,</span> <span class="n">filterValue</span><span class="p">))</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// We can get the view like this</span>
+<span class="kt">FilteredList</span><span class="p">(</span><span class="nv">filterKey</span><span class="p">:</span> <span class="s">"lastName"</span><span class="p">,</span> <span class="nv">filterValue</span><span class="p">:</span> <span class="n">lastNameFilter</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="nv">singer</span><span class="p">:</span> <span class="kt">Singer</span><span class="p">)</span> <span class="k">in</span>
+    <span class="kt">Text</span><span class="p">(</span><span class="s">"</span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedFirstName</span><span class="se">)</span><span class="s"> </span><span class="se">\(</span><span class="n">singer</span><span class="o">.</span><span class="n">wrappedLastName</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Core Data</code> object relationship (one→one, or one→many) can be added to <code class="language-plaintext highlighter-rouge">xxx.xcdatamodeld</code> file. In order to make it work with SwiftUI, create a <code class="language-plaintext highlighter-rouge">NSManagedObject</code> subclass and convert value with <code class="language-plaintext highlighter-rouge">NSSet</code> to <code class="language-plaintext highlighter-rouge">Set</code>, then we can use all entity as usual inside SwiftUI structs</p>
+
+<h2 id="day-57---project-12-part-1"><a href="https://www.hackingwithswift.com/100/swiftui/57">Day 57 - Project 12, part 1</a></h2>
+
+<p>More about Core Data</p>
+
+<p><code class="language-plaintext highlighter-rouge">\.self</code> works for anything that conforms to Hashable, because Swift will generate the hash value for the object and use that to uniquely identify it. This also works for Core Data’s objects because they already conform to Hashable</p>
+
+<p><img src="/assets/img/2020-08-23-week-1-1.png" alt="" /> If we choose <code class="language-plaintext highlighter-rouge">Manual/None</code></p>
+
+<p><img src="/assets/img/2020-08-23-week-1-2.png" alt="" /> Then we can create our own <code class="language-plaintext highlighter-rouge">NSManagedObject</code> subclass to allow customization to the <code class="language-plaintext highlighter-rouge">NSManagedObject</code></p>
+
+<p>We can now remove <code class="language-plaintext highlighter-rouge">?</code> from each property, but it doesn’t stop us from getting <code class="language-plaintext highlighter-rouge">nil</code> value, if we create computed properties when fetch values, then we can make sure we always have values just like below</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">wrappedTitle</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span>
+    <span class="n">title</span> <span class="p">??</span> <span class="s">"Unknown Title"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">hasChanges</code> can be used before trying to save managed object context to make sure there are something to save before saving</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="k">self</span><span class="o">.</span><span class="n">moc</span><span class="o">.</span><span class="n">hasChanges</span> <span class="p">{</span>
+    <span class="k">try</span><span class="p">?</span> <span class="k">self</span><span class="o">.</span><span class="n">moc</span><span class="o">.</span><span class="nf">save</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Also there is a way to prevent saving duplicates</p>
+
+<p><img src="/assets/img/2020-08-23-week-1-3.png" alt="" /> We can add constrains as shown above, add <code class="language-plaintext highlighter-rouge">import CoreData</code> in <code class="language-plaintext highlighter-rouge">SceneDelegate.swift</code>, add the following line to <code class="language-plaintext highlighter-rouge">willConnectTo</code> method. This will allow only unique object to be stored base on the constraints set.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">context</span><span class="o">.</span><span class="n">mergePolicy</span> <span class="o">=</span> <span class="kt">NSMergeByPropertyObjectTrumpMergePolicy</span>
+</code></pre></div></div>
+
+<h2 id="day-56---project-11-part-4"><a href="https://www.hackingwithswift.com/100/swiftui/56">Day 56 - Project 11, part 4</a></h2>
+
+<p>After a few days of following along with me making a project, it’s time for you to step out of your comfort zone and start writing your own code. Once again, these are challenges I’m setting you based on everything you’ve learned so far, which means they are absolutely within your grasp if you set your mind to it.</p>
+
+<p>Amy Morin, a social worker turned author, once said “the more you practice tolerating discomfort, the more confidence you’ll gain in your ability to accept new challenges.” This is the underlying goal in all these challenges: giving you a little nudge to try something yourself, to figure out what works, and – bluntly – to screw up a few times before you figure out the right solution.</p>
+
+<p>There is value in getting things right, but there’s just as much value in getting things wrong. Embrace that – learn to tolerate the discomfort that goes hand-in-hand with writing fresh code yourself – and you’ll be a great developer.</p>
+
+<p><strong>Today you should work through the wrap up chapter for project 11, complete its review, then work through all three of its challenges.</strong></p>
+
+<ul>
+  <li><a href="https://www.hackingwithswift.com/books/ios-swiftui/bookworm-wrap-up">Bookworm: Wrap up</a></li>
+  <li><a href="https://www.hackingwithswift.com/review/ios-swiftui/bookworm">Review for Project 11: Bookworm</a></li>
+</ul>
+
+<p>Share something online about what you learned, or how you might use it in the future – do you like Core Data? Are you keen to create more custom user interface components? Tell folks – stay accountable!</p>
+
+<p><strong>Challenge</strong></p>
+
+<p>One of the best ways to learn is to write your own code as often as possible, so here are three ways you should try extending this app to make sure you fully understand what’s going on.</p>
+
+<ol>
+  <li>Right now it’s possible to select no genre for books, which causes a problem for the detail view. Please fix this, either by forcing a default, validating the form, or showing a default picture for unknown genres – you can choose.
+    <ul>
+      <li>
+        <p>Code</p>
+
+        <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Validate genre and set showNoGenreAlert to true if genre is empty</span>
+  <span class="kd">func</span> <span class="nf">validateGenre</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Bool</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="k">self</span><span class="o">.</span><span class="n">genre</span><span class="o">.</span><span class="n">isEmpty</span> <span class="p">{</span>
+          <span class="k">self</span><span class="o">.</span><span class="n">showNoGenreAlert</span><span class="o">.</span><span class="nf">toggle</span><span class="p">()</span>
+          <span class="k">return</span> <span class="kc">false</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="kc">true</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Base alert on showNoGenreAlert value</span>
+  <span class="o">.</span><span class="nf">alert</span><span class="p">(</span><span class="nv">isPresented</span><span class="p">:</span> <span class="err">$</span><span class="n">showNoGenreAlert</span><span class="p">)</span> <span class="p">{</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Alert</span> <span class="k">in</span>
+      <span class="kt">Alert</span><span class="p">(</span><span class="nv">title</span><span class="p">:</span> <span class="kt">Text</span><span class="p">(</span><span class="s">"Please select genre"</span><span class="p">),</span> <span class="nv">message</span><span class="p">:</span> <span class="kt">Text</span><span class="p">(</span><span class="s">"Genre is required to save a book"</span><span class="p">),</span> <span class="nv">dismissButton</span><span class="p">:</span> <span class="o">.</span><span class="nf">cancel</span><span class="p">())</span>
+  <span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>Screenshot</p>
+
+        <p><img src="/assets/img/2020-08-23-week-1-4.png" alt="" /></p>
+      </li>
+    </ul>
+  </li>
+  <li>Modify <strong><code class="language-plaintext highlighter-rouge">ContentView</code></strong> so that books rated as 1 star have their name shown in red.
+    <ul>
+      <li>
+        <p>Code</p>
+
+        <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Choose color base on rating</span>
+  <span class="kt">Text</span><span class="p">(</span><span class="n">book</span><span class="o">.</span><span class="n">title</span> <span class="p">??</span> <span class="s">"Unknown title"</span><span class="p">)</span><span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="n">headline</span><span class="p">)</span><span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="n">book</span><span class="o">.</span><span class="n">rating</span> <span class="o">&lt;</span> <span class="kt">Int16</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">?</span> <span class="kt">Color</span><span class="o">.</span><span class="nv">red</span> <span class="p">:</span> <span class="kt">Color</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>Screenshot</p>
+
+        <p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/67d5d302-290e-4070-9b86-65042ab07017/Untitled.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/67d5d302-290e-4070-9b86-65042ab07017/Untitled.png" /></p>
+      </li>
+    </ul>
+  </li>
+  <li>Add a new “date” attribute to the Book entity, assigning <strong><code class="language-plaintext highlighter-rouge">Date()</code></strong> to it so it gets the current date and time, then format that nicely somewhere in <strong><code class="language-plaintext highlighter-rouge">DetailView</code></strong>.
+    <ul>
+      <li>
+        <p>Code</p>
+
+        <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Add another date property to Bookworm.xcdatamodeld Book entity</span>
+  <span class="c1">// Getting date from user using DatePicker</span>
+  <span class="kt">DatePicker</span><span class="p">(</span><span class="s">"Enter a date"</span><span class="p">,</span> <span class="nv">selection</span><span class="p">:</span> <span class="err">$</span><span class="n">date</span><span class="p">,</span> <span class="nv">displayedComponents</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="o">.</span><span class="n">hourAndMinute</span><span class="p">])</span><span class="o">.</span><span class="nf">datePickerStyle</span><span class="p">(</span><span class="kt">WheelDatePickerStyle</span><span class="p">())</span>
+
+  <span class="c1">// When displaying, getting date string from date object </span>
+  <span class="kd">func</span> <span class="nf">dateString</span><span class="p">(</span><span class="n">from</span> <span class="nv">date</span><span class="p">:</span> <span class="kt">Date</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">String</span> <span class="p">{</span>
+      <span class="k">guard</span> <span class="k">let</span> <span class="nv">date</span> <span class="o">=</span> <span class="n">date</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="s">"No Date available for the book"</span> <span class="p">}</span>
+      <span class="k">let</span> <span class="nv">formatter</span> <span class="o">=</span> <span class="kt">DateFormatter</span><span class="p">()</span>
+      <span class="n">formatter</span><span class="o">.</span><span class="n">timeStyle</span> <span class="o">=</span> <span class="o">.</span><span class="n">short</span>
+      <span class="n">formatter</span><span class="o">.</span><span class="n">dateStyle</span> <span class="o">=</span> <span class="o">.</span><span class="n">short</span>
+      <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="nf">string</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>Screenshot</p>
+
+        <p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/71cc6aee-369c-41f7-8058-275647739687/Untitled.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/71cc6aee-369c-41f7-8058-275647739687/Untitled.png" /></p>
+      </li>
+    </ul>
+  </li>
+</ol>
+:ET
