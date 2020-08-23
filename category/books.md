@@ -10,5 +10,4 @@ category: book
 - [The Robert C. Martin Clean Code Collection (Collection) (Robert C. Martin Series)](https://www.amazon.com/Robert-Martin-Clean-Code-Collection-ebook/dp/B00666M59G/ref=sr_1_6?dchild=1&keywords=clean+code&qid=1598208779&sr=8-6)
 
 ## Books I've read
-
-Posts get listed below here.
+📭
