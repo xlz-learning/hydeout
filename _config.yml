@@ -5,7 +5,7 @@ highlighter:      rouge
 # Setup
 title:            Xiaolong's Journey
 tagline:          'Commited to lifelong learning'
-description:      Weekly update of what I am working on and what I am reading
+description:      Weekly update of what I am currently learning, reading and working on
 url:              https://github.com/xlz-learning/xlz-learning.github.io
 baseurl:          ''
                   # the optional subpath of your site, e.g. "/blog"
