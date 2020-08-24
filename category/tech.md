@@ -2,6 +2,7 @@
 layout: category
 title: 👨🏻‍💻 Tech gadgets
 category: tech
+sidebar_sort_order: 3
 ---
 Car: [Tesla Model 3 (Late 2019)](https://www.tesla.com/model3)
 

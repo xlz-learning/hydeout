@@ -1,7 +1,8 @@
 ---
 layout: category
-title: 📚  Books
+title: 📚 Books
 category: book
+sidebar_sort_order: 2
 ---
 
 ## Books I am currently reading

@@ -1,7 +1,8 @@
 ---
 layout: category
-title: ☕️  Coffee related
+title: ☕️ Coffee related
 category: coffee
+sidebar_sort_order: 4
 ---
 
 Coffee maker
