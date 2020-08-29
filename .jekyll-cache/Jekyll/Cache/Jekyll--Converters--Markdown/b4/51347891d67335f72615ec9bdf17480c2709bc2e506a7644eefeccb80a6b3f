@@ -1,0 +1,105 @@
+I"\1<h2 id="project-13-part-1"><a href="https://www.hackingwithswift.com/100/swiftui/62">Project 13, part 1</a></h2>
+
+<h3 id="how-property-wrappers-become-structs">How property wrappers become structs</h3>
+
+<p>If we take a look at the definition of <code class="language-plaintext highlighter-rouge">State</code></p>
+
+<p>You see something like the following</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">@propertyWrapper</span> <span class="kd">public</span> <span class="kd">struct</span> <span class="kt">State</span><span class="o">&lt;</span><span class="kt">Value</span><span class="o">&gt;</span> <span class="p">:</span> <span class="kt">DynamicProperty</span> <span class="p">{</span>
+<span class="o">...</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">wrappedValue</span><span class="p">:</span> <span class="kt">Value</span> <span class="p">{</span> <span class="k">get</span> <span class="k">nonmutating</span> <span class="k">set</span> <span class="p">}</span>
+<span class="o">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">wrappedValue</code> is the actual value we’re trying to store.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">blurAmount</span><span class="p">:</span> <span class="kt">CGFloat</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="k">didSet</span> <span class="p">{</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"New value is </span><span class="se">\(</span><span class="n">blurAmount</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>On the surface, that states “when <code class="language-plaintext highlighter-rouge">blurAmount</code> changes, print out its new value.” However, because <code class="language-plaintext highlighter-rouge">@State</code> actually wraps its contents, what it’s actually saying is that when the State struct that wraps <code class="language-plaintext highlighter-rouge">blurAmount</code> changes, print out the new blur amount.</p>
+
+<h3 id="creating-custom-bindings-in-swiftui">Creating custom bindings in SwiftUI</h3>
+
+<p>If we really want to observe the value change, we need to create custom bindings, we need to use the <code class="language-plaintext highlighter-rouge">Binding</code> struct directly, which allows us to provide our own code to run when the value is read or written.</p>
+
+<p>We need to create a custom <code class="language-plaintext highlighter-rouge">Binding</code> struct that acts as a passthrough around <code class="language-plaintext highlighter-rouge">blurAmount</code>, but when we’re setting the value we also want to print a message.</p>
+
+<p>As a result, we need to put this code into the <code class="language-plaintext highlighter-rouge">body</code> property of our view, like this:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">ContentView</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">blurAmount</span><span class="p">:</span> <span class="kt">CGFloat</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">blur</span> <span class="o">=</span> <span class="kt">Binding</span><span class="o">&lt;</span><span class="kt">CGFloat</span><span class="o">&gt;</span><span class="p">(</span>
+            <span class="nv">get</span><span class="p">:</span> <span class="p">{</span>
+                <span class="k">self</span><span class="o">.</span><span class="n">blurAmount</span>
+            <span class="p">},</span>
+            <span class="nv">set</span><span class="p">:</span> <span class="p">{</span>
+                <span class="k">self</span><span class="o">.</span><span class="n">blurAmount</span> <span class="o">=</span> <span class="nv">$0</span>
+                <span class="nf">print</span><span class="p">(</span><span class="s">"New value is </span><span class="se">\(</span><span class="k">self</span><span class="o">.</span><span class="n">blurAmount</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="kt">VStack</span> <span class="p">{</span>
+            <span class="kt">Text</span><span class="p">(</span><span class="s">"Hello, World!"</span><span class="p">)</span>
+                <span class="o">.</span><span class="nf">blur</span><span class="p">(</span><span class="nv">radius</span><span class="p">:</span> <span class="n">blurAmount</span><span class="p">)</span>
+
+            <span class="kt">Slider</span><span class="p">(</span><span class="nv">value</span><span class="p">:</span> <span class="n">blur</span><span class="p">,</span> <span class="nv">in</span><span class="p">:</span> <span class="mi">0</span><span class="o">...</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>One thing that changed is the way we declare the binding in the slider: rather than using $<code class="language-plaintext highlighter-rouge">blurAmount</code> we can just use <code class="language-plaintext highlighter-rouge">blur</code>. This is because using the dollar sign is what gets us the two-way binding from some state, but now that we’ve created the binding directly we no longer need it.</p>
+
+<p>OK, now let’s look at the binding itself. As you should be able to figure out from the way we used it, the basic initializer for a <code class="language-plaintext highlighter-rouge">Binding</code> looks like this:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">init</span><span class="p">(</span><span class="nv">get</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Value</span><span class="p">,</span> <span class="nv">set</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>It’s telling us that the initializer takes two closures: a getter that takes no parameters and returns a value, and a setter that takes a value and returns nothing. <strong><code class="language-plaintext highlighter-rouge">Binding</code></strong> uses generics, so that <strong><code class="language-plaintext highlighter-rouge">Value</code></strong> is really a placeholder for whatever we’re storing inside – a <strong><code class="language-plaintext highlighter-rouge">CGFloat</code></strong> in the case of our <strong><code class="language-plaintext highlighter-rouge">blur</code></strong> binding. Both the <strong><code class="language-plaintext highlighter-rouge">get</code></strong> and <strong><code class="language-plaintext highlighter-rouge">set</code></strong> closures are marked as <strong><code class="language-plaintext highlighter-rouge">@escaping</code></strong>, meaning that the <strong><code class="language-plaintext highlighter-rouge">Binding</code></strong> struct stores them for use later on.</p>
+
+<p>What all this means is that you can do whatever you want inside these closures: you can call methods, run an algorithm to figure out the correct value to use, or even just use random values – it doesn’t matter, as long as you return a value from <strong><code class="language-plaintext highlighter-rouge">get</code></strong>. So, if you want to make sure you update <strong><code class="language-plaintext highlighter-rouge">UserDefaults</code></strong> every time a value is changed, the <strong><code class="language-plaintext highlighter-rouge">set</code></strong> closure of a <strong><code class="language-plaintext highlighter-rouge">Binding</code></strong> is perfect.</p>
+
+<h3 id="showing-multiple-options-with-actionsheet">Showing multiple options with ActionSheet</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Alert</code> shows pop box in the middle and <code class="language-plaintext highlighter-rouge">sheet</code> shows a full screen view.</p>
+
+<p><code class="language-plaintext highlighter-rouge">ActionSheet</code> is a partial screen sheet with buttons that slides up from the bottom of the screen</p>
+
+<p>You can create action sheet as shown below, it’s controlled by <code class="language-plaintext highlighter-rouge">showingActionSheet</code> binding</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">.</span><span class="nf">actionSheet</span><span class="p">(</span><span class="nv">isPresented</span><span class="p">:</span> <span class="err">$</span><span class="n">showingActionSheet</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">ActionSheet</span><span class="p">(</span><span class="nv">title</span><span class="p">:</span> <span class="kt">Text</span><span class="p">(</span><span class="s">"Change background"</span><span class="p">),</span> <span class="nv">message</span><span class="p">:</span> <span class="kt">Text</span><span class="p">(</span><span class="s">"Select a new color"</span><span class="p">),</span> <span class="nv">buttons</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Red"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="o">.</span><span class="n">red</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Green"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="o">.</span><span class="n">green</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Blue"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="o">.</span><span class="n">blue</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">cancel</span><span class="p">()</span>
+    <span class="p">])</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="time-for-core-data"><a href="https://www.hackingwithswift.com/100/swiftui/61">Time for Core Data</a></h2>
+
+<p>Your job today is to expand your app so that it uses Core Data.</p>
+
+<p><a href="https://github.com/xlzhsteven/friendFaceWithCoreData">xlzhsteven/friendFaceWithCoreData</a></p>
+
+<h2 id="milestone-projects-10-12"><a href="https://www.hackingwithswift.com/100/swiftui/60">Milestone: Projects 10-12</a></h2>
+
+<ul>
+  <li>Fetch the data and parse it into <strong><code class="language-plaintext highlighter-rouge">User</code></strong> and <strong><code class="language-plaintext highlighter-rouge">Friend</code></strong> structs.</li>
+  <li>Display a list of users with a little information about them.</li>
+  <li>Create a detail view shown when a user is tapped, presenting more information about them.</li>
+</ul>
+
+<p>Finished project is at</p>
+
+<p><a href="https://github.com/xlzhsteven/FriendFace">xlzhsteven/FriendFace</a></p>
+:ET
