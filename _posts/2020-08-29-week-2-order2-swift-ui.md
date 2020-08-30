@@ -3,6 +3,13 @@ layout: post
 title: 100 Days Of SwiftUI - Aug 24 - 29
 categories:
     - book
+tags:
+  - swiftui
+  - ios
+  - core-data
+  - action-sheet
+  - state
+  - binding
 excerpt_separator:  <!--more-->
 ---
 
