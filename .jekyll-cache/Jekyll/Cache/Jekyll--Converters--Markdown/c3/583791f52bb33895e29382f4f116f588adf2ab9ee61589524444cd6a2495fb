@@ -1,0 +1,348 @@
+I"��<h2 id="project-13-part-5"><a href="https://www.hackingwithswift.com/100/swiftui/66">Project 13, part 5</a></h2>
+
+<h3 id="customizing-our-filter-using-actionsheet">Customizing our filter using ActionSheet</h3>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">func</span> <span class="nf">loadImage</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">inputImage</span> <span class="o">=</span> <span class="n">inputImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    <span class="k">let</span> <span class="nv">beginImage</span> <span class="o">=</span> <span class="kt">CIImage</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="n">inputImage</span><span class="p">)</span> <span class="c1">// Create CIImage from UIImage</span>
+    <span class="n">currentFilter</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">beginImage</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">kCIInputImageKey</span><span class="p">)</span> <span class="c1">// Set input image to the filter</span>
+    <span class="nf">applyProcessing</span><span class="p">()</span> <span class="c1">// Process image</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">applyProcessing</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// Apply slider value differently for different type of filter input keys (Prevent crash due to different values are needed for different keys as well)</span>
+    <span class="k">let</span> <span class="nv">inputKeys</span> <span class="o">=</span> <span class="n">currentFilter</span><span class="o">.</span><span class="n">inputKeys</span>
+    <span class="k">if</span> <span class="n">inputKeys</span><span class="o">.</span><span class="nf">contains</span><span class="p">(</span><span class="n">kCIInputIntensityKey</span><span class="p">)</span> <span class="p">{</span> <span class="n">currentFilter</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">filterIntensity</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">kCIInputIntensityKey</span><span class="p">)</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="n">inputKeys</span><span class="o">.</span><span class="nf">contains</span><span class="p">(</span><span class="n">kCIInputRadiusKey</span><span class="p">)</span> <span class="p">{</span> <span class="n">currentFilter</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">filterIntensity</span> <span class="o">*</span> <span class="mi">200</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">kCIInputRadiusKey</span><span class="p">)</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="n">inputKeys</span><span class="o">.</span><span class="nf">contains</span><span class="p">(</span><span class="n">kCIInputScaleKey</span><span class="p">)</span> <span class="p">{</span> <span class="n">currentFilter</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">filterIntensity</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">kCIInputScaleKey</span><span class="p">)</span> <span class="p">}</span>
+    
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">outputImage</span> <span class="o">=</span> <span class="n">currentFilter</span><span class="o">.</span><span class="n">outputImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span> <span class="c1">// Get output input with CIImage type</span>
+    
+    <span class="k">if</span> <span class="k">let</span> <span class="nv">cgimg</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="nf">createCGImage</span><span class="p">(</span><span class="n">outputImage</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">outputImage</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Create CGImage fro CIImage</span>
+        <span class="k">let</span> <span class="nv">uiImage</span> <span class="o">=</span> <span class="kt">UIImage</span><span class="p">(</span><span class="nv">cgImage</span><span class="p">:</span> <span class="n">cgimg</span><span class="p">)</span> <span class="c1">// Create UIImage from CIImage</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="kt">Image</span><span class="p">(</span><span class="nv">uiImage</span><span class="p">:</span> <span class="n">uiImage</span><span class="p">)</span> <span class="c1">// Save the transformed image to the image placeholder</span>
+        <span class="n">processedImage</span> <span class="o">=</span> <span class="n">uiImage</span> <span class="c1">// Save the processed image so it can be used later</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Set currentFilter with filter from the method argument, then load image</span>
+<span class="kd">func</span> <span class="nf">setFilter</span><span class="p">(</span><span class="n">_</span> <span class="nv">filter</span><span class="p">:</span> <span class="kt">CIFilter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">currentFilter</span> <span class="o">=</span> <span class="n">filter</span>
+    <span class="nf">loadImage</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c1">// The following code is added to the ContentView VStack to support action sheet</span>
+<span class="o">.</span><span class="nf">actionSheet</span><span class="p">(</span><span class="nv">isPresented</span><span class="p">:</span> <span class="err">$</span><span class="n">showingFilterSheet</span><span class="p">)</span> <span class="p">{</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">ActionSheet</span> <span class="k">in</span>
+    <span class="c1">// Create ActionSheet with buttons to apply different filters</span>
+    <span class="kt">ActionSheet</span><span class="p">(</span><span class="nv">title</span><span class="p">:</span> <span class="kt">Text</span><span class="p">(</span><span class="s">"Select a filter"</span><span class="p">),</span> <span class="nv">buttons</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Crystallize"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">crystallize</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Edges"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">edges</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Gaussian Blur"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">gaussianBlur</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Pixellate"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">pixellate</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Sepia Tone"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">sepiaTone</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Unsharp Mask"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">unsharpMask</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">default</span><span class="p">(</span><span class="kt">Text</span><span class="p">(</span><span class="s">"Vignette"</span><span class="p">))</span> <span class="p">{</span> <span class="k">self</span><span class="o">.</span><span class="nf">setFilter</span><span class="p">(</span><span class="kt">CIFilter</span><span class="o">.</span><span class="nf">vignette</span><span class="p">())</span> <span class="p">},</span>
+        <span class="o">.</span><span class="nf">cancel</span><span class="p">()</span>
+    <span class="p">])</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="saving-the-filtered-image-using-uiimagewritetosavedphotosalbum">Saving the filtered image using UIImageWriteToSavedPhotosAlbum()</h3>
+
+<ul>
+  <li>We need to add <code class="language-plaintext highlighter-rouge">Privacy - Photo Library Additions Usage Description</code> with value to the <code class="language-plaintext highlighter-rouge">Info.plist</code> before attempt to save images to photo library</li>
+</ul>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Create ImageSaver.swift to help store image and provide feedback upon image saving finished</span>
+<span class="kd">import</span> <span class="kt">UIKit</span>
+
+<span class="kd">class</span> <span class="kt">ImageSaver</span><span class="p">:</span> <span class="kt">NSObject</span> <span class="p">{</span>
+    
+    <span class="k">var</span> <span class="nv">onComplete</span><span class="p">:</span> <span class="p">((</span><span class="kt">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="kt">Error</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="c1">// Completion handler that contains logic to be called for both success and failure cases</span>
+    
+    <span class="c1">// Method to save photo to album</span>
+    <span class="kd">func</span> <span class="nf">writeToPhotoAlbum</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">UIImageWriteToSavedPhotosAlbum</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="k">self</span><span class="p">,</span> <span class="kd">#selector(</span><span class="nf">saveError</span><span class="kd">)</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// Objc method that gets triggered upon image finish saving with either success or error status (and detail)</span>
+    <span class="kd">@objc</span> <span class="kd">func</span> <span class="nf">saveError</span><span class="p">(</span><span class="n">_</span> <span class="nv">image</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">,</span> <span class="n">didFinishSavingWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">Error</span><span class="p">?,</span> <span class="nv">contextInfo</span><span class="p">:</span> <span class="kt">UnsafeRawPointer</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="k">let</span> <span class="nv">error</span> <span class="o">=</span> <span class="n">error</span> <span class="p">{</span>
+            <span class="nf">onComplete</span><span class="p">?(</span><span class="o">.</span><span class="nf">failure</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">onComplete</span><span class="p">?(</span><span class="o">.</span><span class="nf">success</span><span class="p">(()))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Button is added to provide the image saving functionality to the SwiftUI view</span>
+<span class="kt">Button</span><span class="p">(</span><span class="s">"Save"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Unwrap processedImage</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">processedImage</span> <span class="o">=</span> <span class="k">self</span><span class="o">.</span><span class="n">processedImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    
+    <span class="c1">// Initialize image saver</span>
+    <span class="k">let</span> <span class="nv">imageSaver</span> <span class="o">=</span> <span class="kt">ImageSaver</span><span class="p">()</span>
+    <span class="c1">// Provide success/failure handler to the image saver</span>
+    <span class="n">imageSaver</span><span class="o">.</span><span class="n">onComplete</span> <span class="o">=</span> <span class="p">{</span> <span class="n">result</span> <span class="k">in</span>
+        <span class="k">switch</span> <span class="n">result</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nf">failure</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+            <span class="nf">print</span><span class="p">(</span><span class="s">"Save failed"</span><span class="p">)</span>
+        <span class="k">case</span> <span class="o">.</span><span class="nf">success</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+            <span class="nf">print</span><span class="p">(</span><span class="s">"Save successful"</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c1">// Trigger image saving</span>
+    <span class="n">imageSaver</span><span class="o">.</span><span class="nf">writeToPhotoAlbum</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="n">processedImage</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="project-13-part-4"><a href="https://www.hackingwithswift.com/100/swiftui/65">Project 13, part 4</a></h2>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Other than the ImagePicker which was built in the previous part, evertyhing is here and explained</span>
+<span class="kd">struct</span> <span class="kt">ContentView</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">image</span><span class="p">:</span> <span class="kt">Image</span><span class="p">?</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">filterIntensity</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">showingImagePicker</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">inputImage</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">?</span>
+    
+    <span class="kd">@State</span> <span class="k">var</span> <span class="nv">currentFilter</span> <span class="o">=</span> <span class="kt">CIFilter</span><span class="o">.</span><span class="nf">sepiaTone</span><span class="p">()</span>
+    <span class="k">let</span> <span class="nv">context</span> <span class="o">=</span> <span class="kt">CIContext</span><span class="p">()</span>
+    
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="c1">// Create Binding that returns filterIntensity when fetching</span>
+        <span class="c1">// When setting the value, update filterIntensity and also trigger applyProcessing() method</span>
+        <span class="c1">// This is needed since @State is struct, wrappedValue is nonmutating, we have to create a custom binding to provide our own code to run when the value is read or written</span>
+        <span class="c1">// https://www.hackingwithswift.com/books/ios-swiftui/creating-custom-bindings-in-swiftui for more details</span>
+        <span class="k">let</span> <span class="nv">intensity</span> <span class="o">=</span> <span class="kt">Binding</span><span class="o">&lt;</span><span class="kt">Double</span><span class="o">&gt;</span><span class="p">(</span>
+            <span class="nv">get</span><span class="p">:</span> <span class="p">{</span>
+                <span class="k">self</span><span class="o">.</span><span class="n">filterIntensity</span>
+            <span class="p">},</span>
+            <span class="nv">set</span><span class="p">:</span> <span class="p">{</span>
+                <span class="k">self</span><span class="o">.</span><span class="n">filterIntensity</span> <span class="o">=</span> <span class="nv">$0</span>
+                <span class="k">self</span><span class="o">.</span><span class="nf">applyProcessing</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kt">NavigationView</span> <span class="p">{</span>
+            <span class="kt">VStack</span> <span class="p">{</span>
+                <span class="kt">ZStack</span> <span class="p">{</span>
+                    <span class="kt">Rectangle</span><span class="p">()</span>
+                        <span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="kt">Color</span><span class="o">.</span><span class="n">secondary</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">image</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+                        <span class="n">image</span><span class="p">?</span><span class="o">.</span><span class="nf">resizable</span><span class="p">()</span><span class="o">.</span><span class="nf">scaledToFit</span><span class="p">()</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="kt">Text</span><span class="p">(</span><span class="s">"Tap to select a picture"</span><span class="p">)</span>
+                            <span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+                            <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="n">headline</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="o">.</span><span class="n">onTapGesture</span> <span class="p">{</span>
+                    <span class="k">self</span><span class="o">.</span><span class="n">showingImagePicker</span> <span class="o">=</span> <span class="kc">true</span> <span class="c1">// Tap to show image picker</span>
+                <span class="p">}</span>
+                
+                <span class="kt">HStack</span> <span class="p">{</span>
+                    <span class="kt">Text</span><span class="p">(</span><span class="s">"Intensity"</span><span class="p">)</span>
+                    <span class="kt">Slider</span><span class="p">(</span><span class="nv">value</span><span class="p">:</span> <span class="n">intensity</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">vertical</span><span class="p">)</span>
+                
+                <span class="kt">HStack</span> <span class="p">{</span>
+                    <span class="kt">Button</span><span class="p">(</span><span class="s">"Change Filter"</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="c1">// change filter</span>
+                    <span class="p">}</span>
+                    
+                    <span class="kt">Spacer</span><span class="p">()</span>
+                    
+                    <span class="kt">Button</span><span class="p">(</span><span class="s">"Save"</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="c1">// save the picture</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="o">.</span><span class="nf">padding</span><span class="p">([</span><span class="o">.</span><span class="n">horizontal</span><span class="p">,</span> <span class="o">.</span><span class="n">bottom</span><span class="p">])</span>
+            <span class="o">.</span><span class="nf">navigationBarTitle</span><span class="p">(</span><span class="s">"Instafilter"</span><span class="p">)</span>
+            <span class="o">.</span><span class="nf">sheet</span><span class="p">(</span><span class="nv">isPresented</span><span class="p">:</span> <span class="err">$</span><span class="n">showingImagePicker</span><span class="p">,</span>
+                   <span class="nv">onDismiss</span><span class="p">:</span> <span class="n">loadImage</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// When sheet is dismissed, call loadImage()</span>
+                <span class="kt">ImagePicker</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="k">self</span><span class="o">.</span><span class="err">$</span><span class="n">inputImage</span><span class="p">)</span> <span class="c1">// Present ImagePicker in a sheet</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="kd">private</span> <span class="kd">func</span> <span class="nf">loadImage</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">guard</span> <span class="k">let</span> <span class="nv">inputImage</span> <span class="o">=</span> <span class="n">inputImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+        <span class="k">let</span> <span class="nv">beginImage</span> <span class="o">=</span> <span class="kt">CIImage</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="n">inputImage</span><span class="p">)</span> <span class="c1">// Create CIImage from UIImage</span>
+        <span class="n">currentFilter</span><span class="o">.</span><span class="nf">setValue</span><span class="p">(</span><span class="n">beginImage</span><span class="p">,</span> <span class="nv">forKey</span><span class="p">:</span> <span class="n">kCIInputImageKey</span><span class="p">)</span> <span class="c1">// Set input image to the filter</span>
+        <span class="nf">applyProcessing</span><span class="p">()</span> <span class="c1">// Process image</span>
+    <span class="p">}</span>
+    
+    <span class="kd">func</span> <span class="nf">applyProcessing</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">currentFilter</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="kt">Float</span><span class="p">(</span><span class="n">filterIntensity</span><span class="p">)</span> <span class="c1">// Set filter intensity with filterIntensity value</span>
+        
+        <span class="k">guard</span> <span class="k">let</span> <span class="nv">outputImage</span> <span class="o">=</span> <span class="n">currentFilter</span><span class="o">.</span><span class="n">outputImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span> <span class="c1">// Get output input with CIImage type</span>
+        
+        <span class="k">if</span> <span class="k">let</span> <span class="nv">cgimg</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="nf">createCGImage</span><span class="p">(</span><span class="n">outputImage</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">outputImage</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Create CGImage fro CIImage</span>
+            <span class="k">let</span> <span class="nv">uiImage</span> <span class="o">=</span> <span class="kt">UIImage</span><span class="p">(</span><span class="nv">cgImage</span><span class="p">:</span> <span class="n">cgimg</span><span class="p">)</span> <span class="c1">// Create UIImage from CIImage</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="kt">Image</span><span class="p">(</span><span class="nv">uiImage</span><span class="p">:</span> <span class="n">uiImage</span><span class="p">)</span> <span class="c1">// Save the transformed image to the image placeholder</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="project-13-part-3"><a href="https://www.hackingwithswift.com/100/swiftui/64">Project 13, part 3</a></h2>
+
+<h3 id="using-coordinators-to-manage-swiftui-view-controllers">Using coordinators to manage SwiftUI view controllers</h3>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">ImagePicker</span><span class="p">:</span> <span class="kt">UIViewControllerRepresentable</span> <span class="p">{</span>
+    <span class="kd">@Binding</span> <span class="k">var</span> <span class="nv">image</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">?</span> <span class="c1">// Create 2 way binding</span>
+    <span class="kd">@Environment</span><span class="p">(\</span><span class="o">.</span><span class="n">presentationMode</span><span class="p">)</span> <span class="k">var</span> <span class="nv">presentationMode</span> <span class="c1">// Use to dismiss the ImagePicker view</span>
+    
+    <span class="c1">// Required to be implemented if class Coordinator is defined</span>
+    <span class="kd">func</span> <span class="nf">makeCoordinator</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Coordinator</span> <span class="p">{</span>
+        <span class="kt">Coordinator</span><span class="p">(</span><span class="k">self</span><span class="p">)</span> <span class="c1">// Construct Coordinator using the initializer defined inside the Coordinator inner class</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// Have to conform to the 3 classes to register delegation</span>
+    <span class="kd">class</span> <span class="kt">Coordinator</span><span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">UIImagePickerControllerDelegate</span><span class="p">,</span> <span class="kt">UINavigationControllerDelegate</span> <span class="p">{</span>
+        <span class="k">var</span> <span class="nv">parent</span><span class="p">:</span> <span class="kt">ImagePicker</span> <span class="c1">// Create reference between the Coordinator and the ImagePicker so value can be passed</span>
+        <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">parent</span><span class="p">:</span> <span class="kt">ImagePicker</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="p">}</span>
+        
+        <span class="kd">func</span> <span class="nf">imagePickerController</span><span class="p">(</span><span class="n">_</span> <span class="nv">picker</span><span class="p">:</span> <span class="kt">UIImagePickerController</span><span class="p">,</span> <span class="n">didFinishPickingMediaWithInfo</span> <span class="nv">info</span><span class="p">:</span> <span class="p">[</span><span class="kt">UIImagePickerController</span><span class="o">.</span><span class="kt">InfoKey</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">])</span> <span class="p">{</span>
+            <span class="c1">// After use picks the image, fetch the image using the line below</span>
+            <span class="k">if</span> <span class="k">let</span> <span class="nv">uiImage</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="o">.</span><span class="n">originalImage</span><span class="p">]</span> <span class="k">as?</span> <span class="kt">UIImage</span> <span class="p">{</span>
+                <span class="n">parent</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">uiImage</span> <span class="c1">//Save it to the image variable inside ImagePicker</span>
+            <span class="p">}</span>
+            
+            <span class="n">parent</span><span class="o">.</span><span class="n">presentationMode</span><span class="o">.</span><span class="n">wrappedValue</span><span class="o">.</span><span class="nf">dismiss</span><span class="p">()</span> <span class="c1">// Dismiss the UIImagePickerController</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    
+    <span class="kd">func</span> <span class="nf">makeUIViewController</span><span class="p">(</span><span class="nv">context</span><span class="p">:</span> <span class="kt">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">UIImagePickerController</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">picker</span> <span class="o">=</span> <span class="kt">UIImagePickerController</span><span class="p">()</span>
+        <span class="n">picker</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">coordinator</span> <span class="c1">// Use the coordinator defined as delegate for UIImagePickerController</span>
+        <span class="k">return</span> <span class="n">picker</span>
+    <span class="p">}</span>
+    
+    <span class="kd">func</span> <span class="nf">updateUIViewController</span><span class="p">(</span><span class="n">_</span> <span class="nv">uiViewController</span><span class="p">:</span> <span class="kt">UIImagePickerController</span><span class="p">,</span> <span class="nv">context</span><span class="p">:</span> <span class="kt">Context</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// Inside ContentView SwiftUI view</span>
+<span class="c1">// We need to create a @State private var inputImage: UIImage? and pass it to ImagePicker's image Binding</span>
+</code></pre></div></div>
+
+<h3 id="how-to-save-images-to-the-users-photo-library">How to save images to the user’s photo library</h3>
+
+<p>First we need to add <code class="language-plaintext highlighter-rouge">Privacy - Photo Library Additions Usage Description : ${Some text to explain why we want to access user's photo library}</code>The first time when we are trying to access user’s photo library, an alert will show up to ask for user’s permission</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// We need some sort of class that inherits from NSObject in order to write to the photo library and read the response</span>
+<span class="kd">class</span> <span class="kt">ImageSaver</span><span class="p">:</span> <span class="kt">NSObject</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">writeToPhotoAlbum</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">UIImageWriteToSavedPhotosAlbum</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="k">self</span><span class="p">,</span> <span class="kd">#selector(</span><span class="nf">saveError</span><span class="kd">)</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="kd">@objc</span>
+    <span class="kd">func</span> <span class="nf">saveError</span><span class="p">(</span><span class="n">_</span> <span class="nv">image</span><span class="p">:</span> <span class="kt">UIImage</span><span class="p">,</span> <span class="n">didFinishSavingWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">Error</span><span class="p">?,</span> <span class="nv">contextInfo</span><span class="p">:</span> <span class="kt">UnsafeRawPointer</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Save finished!"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// If we want to save the image and read response, we can do the following</span>
+<span class="c1">// Construct ImageSaver instance to access the writeToPhotoAlbum method</span>
+<span class="k">let</span> <span class="nv">imageSaver</span> <span class="o">=</span> <span class="kt">ImageSaver</span><span class="p">()</span>
+<span class="n">imageSaver</span><span class="o">.</span><span class="nf">writeToPhotoAlbum</span><span class="p">(</span><span class="nv">image</span><span class="p">:</span> <span class="n">inputImage</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="project-13-part-2"><a href="https://www.hackingwithswift.com/100/swiftui/63">Project 13, part 2</a></h2>
+
+<h3 id="integrating-core-image-with-swiftui">Integrating Core Image with SwiftUI</h3>
+
+<p>Using filter from <code class="language-plaintext highlighter-rouge">CoreImage.CIFilterBuiltins</code></p>
+
+<p>First we need to import the following library</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">CoreImage</span>
+<span class="kd">import</span> <span class="kt">CoreImage</span><span class="o">.</span><span class="kt">CIFilterBuiltins</span>
+</code></pre></div></div>
+
+<p>Next we’ll create the context and filter. For this example we’re going to use a sepia tone filter, which applies a brown tone that makes a photo look like it was taken a long time ago.</p>
+
+<p>So, replace the <strong><code class="language-plaintext highlighter-rouge">// more code to come</code></strong> comment with this:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">context</span> <span class="o">=</span> <span class="kt">CIContext</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">currentFilter</span> <span class="o">=</span> <span class="kt">CIFilter</span><span class="o">.</span><span class="nf">sepiaTone</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>We can now customize our filter to change the way it works. Sepia is a simple filter, so it only has two interesting properties: <strong><code class="language-plaintext highlighter-rouge">inputImage</code></strong> is the image we want to change, and <strong><code class="language-plaintext highlighter-rouge">intensity</code></strong> is how strongly the sepia effect should be applied, specified in the range 0 (original image) and 1 (full sepia).</p>
+
+<p>So, add these two lines of code below the previous two:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">currentFilter</span><span class="o">.</span><span class="n">inputImage</span> <span class="o">=</span> <span class="n">beginImage</span>
+<span class="n">currentFilter</span><span class="o">.</span><span class="n">intensity</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Read the output image from our filter, which will be a <strong><code class="language-plaintext highlighter-rouge">CIImage</code></strong>. This might fail, so it returns an optional.</li>
+  <li>Ask our context to create a <strong><code class="language-plaintext highlighter-rouge">CGImage</code></strong> from that output image. This also might fail, so again it returns an optional.</li>
+  <li>Convert that <strong><code class="language-plaintext highlighter-rouge">CGImage</code></strong> into a <strong><code class="language-plaintext highlighter-rouge">UIImage</code></strong>.</li>
+  <li>Convert that <strong><code class="language-plaintext highlighter-rouge">UIImage</code></strong> into a SwiftUI <strong><code class="language-plaintext highlighter-rouge">Image</code></strong>.</li>
+</ul>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// get a CIImage from our filter or exit if that fails</span>
+<span class="k">guard</span> <span class="k">let</span> <span class="nv">outputImage</span> <span class="o">=</span> <span class="n">currentFilter</span><span class="o">.</span><span class="n">outputImage</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+
+<span class="c1">// attempt to get a CGImage from our CIImage</span>
+<span class="k">if</span> <span class="k">let</span> <span class="nv">cgimg</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="nf">createCGImage</span><span class="p">(</span><span class="n">outputImage</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">outputImage</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// convert that to a UIImage</span>
+    <span class="k">let</span> <span class="nv">uiImage</span> <span class="o">=</span> <span class="kt">UIImage</span><span class="p">(</span><span class="nv">cgImage</span><span class="p">:</span> <span class="n">cgimg</span><span class="p">)</span>
+
+    <span class="c1">// and convert that to a SwiftUI image</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="kt">Image</span><span class="p">(</span><span class="nv">uiImage</span><span class="p">:</span> <span class="n">uiImage</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="wrapping-a-uiviewcontroller-in-a-swiftui-view">Wrapping a UIViewController in a SwiftUI view</h3>
+
+<p>Since <code class="language-plaintext highlighter-rouge">UIImagePickerController</code> is a <code class="language-plaintext highlighter-rouge">UIKit</code> class. We need to wrap it inside a <code class="language-plaintext highlighter-rouge">View</code> to use it.</p>
+
+<p>We need to create a wrapper view, in this case we are creating a view called <code class="language-plaintext highlighter-rouge">ImagePicker</code></p>
+
+<p>It needs to conform to <code class="language-plaintext highlighter-rouge">UIViewControllerRepresentable</code> and implement 2 methods.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">makeUIViewController</code></li>
+  <li><code class="language-plaintext highlighter-rouge">updateUIViewController</code></li>
+</ul>
+
+<p>We are only going to implement <code class="language-plaintext highlighter-rouge">makeUIViewController</code> for  now</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">func</span> <span class="nf">makeUIViewController</span><span class="p">(</span><span class="nv">context</span><span class="p">:</span> <span class="kt">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">UIImagePickerController</span> <span class="p">{</span>
+    <span class="kt">UIImagePickerController</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Once we have the above method implemented, we can use <code class="language-plaintext highlighter-rouge">ImagePicker</code> to display the image picker view as shown below</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">ContentView</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">image</span><span class="p">:</span> <span class="kt">Image</span><span class="p">?</span>
+    <span class="kd">@State</span> <span class="kd">private</span> <span class="k">var</span> <span class="nv">showingImagePicker</span> <span class="o">=</span> <span class="kc">false</span>
+
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">VStack</span> <span class="p">{</span>
+            <span class="n">image</span><span class="p">?</span>
+                <span class="o">.</span><span class="nf">resizable</span><span class="p">()</span>
+                <span class="o">.</span><span class="nf">scaledToFit</span><span class="p">()</span>
+
+            <span class="kt">Button</span><span class="p">(</span><span class="s">"Select Image"</span><span class="p">)</span> <span class="p">{</span>
+               <span class="k">self</span><span class="o">.</span><span class="n">showingImagePicker</span> <span class="o">=</span> <span class="kc">true</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="o">.</span><span class="nf">sheet</span><span class="p">(</span><span class="nv">isPresented</span><span class="p">:</span> <span class="err">$</span><span class="n">showingImagePicker</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">ImagePicker</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET
