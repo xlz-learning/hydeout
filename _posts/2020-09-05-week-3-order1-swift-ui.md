@@ -3,6 +3,12 @@ layout: post
 title: Tribe of mentors - Aug 30 - Sep 05
 categories:
     - book
+tags:
+  - swiftui
+  - ios
+  - UIViewControllerRepresentable
+  - CoreImage
+  - UIViewControllerRepresentable-coordinator
 excerpt_separator:  <!--more-->
 ---
 
